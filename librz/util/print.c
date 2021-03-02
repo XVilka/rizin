@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-only
 
+#include <stdbool.h>
+
 #include <rz_util/rz_print.h>
 #include <rz_analysis.h>
 
@@ -2138,3 +2140,37 @@ RZ_API void rz_print_rowlog_done(RzPrint *print, const char *str) {
 		}
 	}
 }
+
+/**
+ * Prints all SDB items that matches the criteria set by filter function using print function
+ *
+ * \param db SDB reference
+ * \param filterfn A filtering function
+ * \param printfn A printing function
+ * \param sort If sort the keys
+ * \param pj PJ (Print JSON) object pointer
+ * \param user Optional user data pointer
+ */
+RZ_API void rz_print_sdb_filter(Sdb *db, SdbForeachCallback filterfn,
+		void (*printfn)(PJ *pj, void *user, const char *k, const char *v),
+		bool sort, PJ *pj, void *user) {
+	SdbList *l = sdb_foreach_list_filter_user(db, filterfn, sort, db);
+	SdbListIter *it;
+	SdbKv *kv;
+
+	if (pj) {
+		pj_a(pj);
+	}
+	ls_foreach (l, it, kv) {
+		const char *k = sdbkv_key(kv);
+		if (!k || !*k) {
+			continue;
+		}
+		printfn(pj, user, k, sdbkv_value(kv));
+	}
+	if (pj) {
+		pj_end(pj);
+	}
+	ls_free(l);
+}
+

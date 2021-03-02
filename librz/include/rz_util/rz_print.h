@@ -222,6 +222,10 @@ RZ_API char *rz_print_json_indent(const char *s, bool color, const char *tab, co
 RZ_API char *rz_print_json_human(const char *s);
 RZ_API char *rz_print_json_path(const char *s, int pos);
 
+RZ_API void rz_print_sdb_filter(Sdb *db, SdbForeachCallback filterfn,
+		void (*printfn)(PJ *pj, void *user, const char *k, const char *v),
+		bool sort, PJ *pj, void *user);
+
 #endif
 
 #ifdef __cplusplus
